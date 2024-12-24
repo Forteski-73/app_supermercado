@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/item_model.dart';
+//import '../helpers/database_helper.dart';
 
 class ListaComprasScreen extends StatefulWidget {
   @override
@@ -15,7 +16,7 @@ class _ListaComprasScreenState extends State<ListaComprasScreen> {
   @override
   void initState() {
     super.initState();
-    _carregarItens();
+    _carregarItens(); // Carregar itens ao iniciar a tela
   }
 
   // Carrega os itens do banco de dados
@@ -32,9 +33,10 @@ class _ListaComprasScreenState extends State<ListaComprasScreen> {
     final nome = _controllerNome.text;
     if (nome.isNotEmpty) {
       final novoItem = Item(nome: nome);
-      await dbHelper.insertItem(novoItem);
-      _carregarItens(); // Atualiza a lista
-      _controllerNome.clear();
+      await dbHelper.insertItem(novoItem); // Insere o item no banco
+      _carregarItens(); // Atualiza a lista de itens
+      _controllerNome.clear(); // Limpa o campo de nome
+      setState(() {}); // Força a atualização da UI
     }
   }
 
@@ -43,7 +45,8 @@ class _ListaComprasScreenState extends State<ListaComprasScreen> {
     setState(() {
       _itens[index].comprado = !_itens[index].comprado;
     });
-    await dbHelper.updateItem(_itens[index]); // Atualiza no banco
+    await dbHelper.updateItem(_itens[index]); // Atualiza o item no banco
+    _carregarItens(); // Atualiza a lista de itens
   }
 
   // Atualiza o preço de um item e faz o update no banco
@@ -52,16 +55,24 @@ class _ListaComprasScreenState extends State<ListaComprasScreen> {
     setState(() {
       _itens[index].preco = preco;
     });
-    await dbHelper.updateItem(_itens[index]); // Atualiza no banco
-    _controllerPreco.clear();
+    await dbHelper.updateItem(_itens[index]); // Atualiza o preço no banco
+    _carregarItens(); // Atualiza a lista de itens
+    _controllerPreco.clear(); // Limpa o campo de preço
   }
 
+  // Cálculo do total dos itens comprados
   double get total {
     double soma = 0.0;
     for (var item in _itens) {
       if (item.comprado) soma += item.preco;
     }
     return soma;
+  }
+
+  // Método para excluir todos os itens do banco de dados
+  void _limparLista() async {
+    await dbHelper.deleteAllItems(); // Exclui todos os itens do banco
+    _carregarItens(); // Atualiza a lista na interface
   }
 
   @override
@@ -81,22 +92,44 @@ class _ListaComprasScreenState extends State<ListaComprasScreen> {
               ),
             ),
             SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: _adicionarItem,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue, // Cor de fundo azul
-                foregroundColor: Colors.white, // Cor do texto branco
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8), // Raio da borda de 8
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: _adicionarItem,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue, // Cor de fundo azul
+                    foregroundColor: Colors.white, // Cor do texto branco
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8), // Raio da borda de 8
+                    ),
+                  ),
+                  child: Text(
+                    'Adicionar Item',
+                    style: TextStyle(
+                      fontSize: 16, // Tamanho da fonte
+                      fontWeight: FontWeight.bold, // Peso da fonte
+                    ),
+                  ),
                 ),
-              ),
-              child: Text(
-                'Adicionar Item',
-                style: TextStyle(
-                  fontSize: 16, // Defina o tamanho da fonte se necessário
-                  fontWeight: FontWeight.bold, // Define o peso da fonte, se necessário
+                ElevatedButton(
+                  onPressed: _limparLista,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red, // Cor de fundo vermelha
+                    foregroundColor: Colors.white, // Cor do texto branco
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8), // Raio da borda de 8
+                    ),
+                  ),
+                  child: Text(
+                    'Limpar Lista',
+                    style: TextStyle(
+                      fontSize: 16, // Tamanho da fonte
+                      fontWeight: FontWeight.bold, // Peso da fonte
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
             SizedBox(height: 20.0),
             Expanded(
@@ -123,7 +156,7 @@ class _ListaComprasScreenState extends State<ListaComprasScreen> {
                                   labelText: 'Digite o preço',
                                 ),
                                 onSubmitted: (_) {
-                                  _atualizarPreco(index);
+                                  _atualizarPreco(index); // Atualiza o preço
                                 },
                               ),
                             ],
