@@ -1,0 +1,41 @@
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.buildDir = "../build"
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(":app")
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.2.1'  // Aqui está a dependência correta
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10' // Exemplo de plugin Kotlin
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+/*task wrapper(type: Wrapper) {
+    gradleVersion = '8.2'
+    distributionUrl = distributionUrl.replace("bin", "all")
+}*/
