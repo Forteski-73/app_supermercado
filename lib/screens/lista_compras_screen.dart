@@ -10,7 +10,6 @@ class ListaComprasScreen extends StatefulWidget {
 class _ListaComprasScreenState extends State<ListaComprasScreen> {
   final List<Item> _itens = [];
   final TextEditingController _controllerNome = TextEditingController();
-  final TextEditingController _controllerPreco = TextEditingController();
   final dbHelper = DatabaseHelper();
 
   @override
@@ -50,14 +49,13 @@ class _ListaComprasScreenState extends State<ListaComprasScreen> {
   }
 
   // Atualiza o preço de um item e faz o update no banco
-  void _atualizarPreco(int index) async {
-    final preco = double.tryParse(_controllerPreco.text) ?? 0.0;
+  void _atualizarPreco(int index, String preco) async {
+    final precoValue = double.tryParse(preco) ?? 0.0;
     setState(() {
-      _itens[index].preco = preco;
+      _itens[index].preco = precoValue;
     });
     await dbHelper.updateItem(_itens[index]); // Atualiza o preço no banco
     _carregarItens(); // Atualiza a lista de itens
-    _controllerPreco.clear(); // Limpa o campo de preço
   }
 
   // Cálculo do total dos itens comprados
@@ -137,6 +135,9 @@ class _ListaComprasScreenState extends State<ListaComprasScreen> {
                 itemCount: _itens.length,
                 itemBuilder: (context, index) {
                   final item = _itens[index];
+                  final TextEditingController _controllerPreco = TextEditingController();
+                  _controllerPreco.text = item.preco.toStringAsFixed(2); // Definindo o preço inicial do item
+                  
                   return ListTile(
                     title: Text(item.nome),
                     trailing: Checkbox(
@@ -155,8 +156,8 @@ class _ListaComprasScreenState extends State<ListaComprasScreen> {
                                 decoration: InputDecoration(
                                   labelText: 'Digite o preço',
                                 ),
-                                onSubmitted: (_) {
-                                  _atualizarPreco(index); // Atualiza o preço
+                                onChanged: (value) {
+                                  _atualizarPreco(index, value); // Atualiza o preço enquanto digita
                                 },
                               ),
                             ],
