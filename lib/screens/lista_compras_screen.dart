@@ -58,6 +58,17 @@ class _ListaComprasScreenState extends State<ListaComprasScreen> {
     _carregarItens(); // Atualiza a lista de itens
   }
 
+  // Exclui o item do banco de dados e atualiza a lista
+  void _excluirItem(int index) async {
+    if (_itens[index].id != null) {  // Verifique se o id não é nulo
+      await dbHelper.deleteItem(_itens[index].id!); // Exclui o item no banco
+      _carregarItens(); // Atualiza a lista de itens
+    } else {
+      // Caso o id seja nulo, trate o erro ou ignore
+      print("ID é nulo, não é possível excluir o item.");
+    }
+  }
+
   // Cálculo do total dos itens comprados
   double get total {
     double soma = 0.0;
@@ -140,9 +151,18 @@ class _ListaComprasScreenState extends State<ListaComprasScreen> {
                   
                   return ListTile(
                     title: Text(item.nome),
-                    trailing: Checkbox(
-                      value: item.comprado,
-                      onChanged: (_) => _marcarComprado(index),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Checkbox(
+                          value: item.comprado,
+                          onChanged: (_) => _marcarComprado(index),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () => _excluirItem(index), // Exclui o item
+                        ),
+                      ],
                     ),
                     tileColor: item.comprado ? Colors.green[100] : null,
                     subtitle: item.comprado
