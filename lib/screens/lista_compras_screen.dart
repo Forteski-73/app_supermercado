@@ -156,8 +156,8 @@ class _ListaComprasScreenState extends State<ListaComprasScreen> {
                                 decoration: InputDecoration(
                                   labelText: 'Digite o preço',
                                 ),
-                                onChanged: (value) {
-                                  _atualizarPreco(index, value); // Atualiza o preço enquanto digita
+                                onSubmitted: (value) {
+                                  _atualizarPreco(index, value); // Executa somente quando "Enter" é pressionado
                                 },
                               ),
                             ],
